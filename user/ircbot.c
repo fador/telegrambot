@@ -4,7 +4,7 @@
 #include "mem.h"
 #include "osapi.h"
 #include "ircbot.h"
-#include "irc.h"
+#include "connection.h"
 #include "io.h"
 
 typedef struct {

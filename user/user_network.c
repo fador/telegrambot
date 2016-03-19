@@ -9,7 +9,7 @@ Tnx to Sprite_TM (source came from his esp8266ircbot)
 #include "osapi.h"
 #include "user_network.h"
 #include "user_config.h"
-#include "irc.h"
+#include "connection.h"
 
 static char lineBuf[1024];
 static int lineBufPos;

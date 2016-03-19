@@ -5,7 +5,7 @@
 #include "driver/uart.h"
 #include "osapi.h"
 #include "espconn.h"
-#include "irc.h"
+#include "connection.h"
 #include "ircbot.h"
 #include "io.h"
 #include "user_network.h"

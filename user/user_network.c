@@ -60,33 +60,31 @@ static void ICACHE_FLASH_ATTR networkDisconCb(void *arg) {
 }
 
 
-void ICACHE_FLASH_ATTR
-network_start() {
+void ICACHE_FLASH_ATTR network_start() {
   telegramInit();
-  ircbotInit();
+  //ircbotInit();
 }
 
-void ICACHE_FLASH_ATTR
-network_check_ip(void)
+void ICACHE_FLASH_ATTR network_check_ip(void)
 {
-    struct ip_info ipconfig;
+  struct ip_info ipconfig;
 
-    os_timer_disarm(&network_timer);
+  os_timer_disarm(&network_timer);
 
-    wifi_get_ip_info(STATION_IF, &ipconfig);
+  wifi_get_ip_info(STATION_IF, &ipconfig);
 
 
-    if (wifi_station_get_connect_status() == STATION_GOT_IP && ipconfig.ip.addr != 0) {
-        char page_buffer[20];
-        os_sprintf(page_buffer,"IP: %d.%d.%d.%d",IP2STR(&ipconfig.ip));
-        network_start();
-    }
-    else 
-    {
-        os_printf("No ip found\n\r");
-        os_timer_setfn(&network_timer, (os_timer_func_t *)network_check_ip, NULL);
-        os_timer_arm(&network_timer, 1000, 0);
-    } 
+  if (wifi_station_get_connect_status() == STATION_GOT_IP && ipconfig.ip.addr != 0) {
+    char page_buffer[20];
+    os_sprintf(page_buffer,"IP: %d.%d.%d.%d",IP2STR(&ipconfig.ip));
+    network_start();
+  }
+  else 
+  {
+    os_printf("No ip found\n\r");
+    os_timer_setfn(&network_timer, (os_timer_func_t *)network_check_ip, NULL);
+    os_timer_arm(&network_timer, 1000, 0);
+  } 
         
 }
 

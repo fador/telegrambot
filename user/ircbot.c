@@ -21,6 +21,7 @@ static ETSTimer timer;
 //ETSTimer *timer, void *arg
 void ICACHE_FLASH_ATTR ircbotSecTimer(void) {
   int i;
+  os_printf("Ping\r\n");
   for (i=0; i<NOUSERSSEEN; i++) users[i].timeSince++;
 }
 

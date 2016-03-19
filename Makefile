@@ -12,7 +12,7 @@ FW_BASE		= firmware
 XTENSA_TOOLS_ROOT = I:/projektit/ESP8266/Espressif_toolchain/xtensa-lx106-elf/bin
 
 # base directory of the ESP8266 SDK package, absolute
-SDK_BASE = I:/projektit/ESP8266/Espressif_toolchain/esp_iot_sdk_v1.5.0
+SDK_BASE = I:/projektit/ESP8266/Espressif_toolchain/esp_iot_sdk_v1.5.2
 
 # name for the target project
 TARGET		= telegrambot
@@ -22,7 +22,7 @@ MODULES		= driver user
 EXTRA_INCDIR	= include ../../esp_iot_sdk_novm_unpacked/usr/xtensa/XtDevTools/install/builds/RC-2010.1-win32/lx106/xtensa-elf/include/
 
 # libraries used in this project, mainly provided by the SDK
-LIBS		= c gcc hal pp phy net80211 lwip wpa main upgrade ssl crypto axtls 
+LIBS		= c gcc hal pp phy net80211 lwip wpa wpa2 main upgrade ssl crypto 
 # compiler flags using during compilation of source files
 CFLAGS		= -Os -g -Wpointer-arith -Wundef -Werror -Wl,-EL -fno-inline-functions -nostdlib -mlongcalls -mtext-section-literals  -D__ets__ -DICACHE_FLASH
 

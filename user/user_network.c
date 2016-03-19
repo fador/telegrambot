@@ -90,6 +90,7 @@ void ICACHE_FLASH_ATTR network_check_ip(void)
 
 void ICACHE_FLASH_ATTR network_init()
 {
+    os_printf("Network init\n");
     os_timer_disarm(&network_timer);
     os_timer_setfn(&network_timer, (os_timer_func_t *)network_check_ip, NULL);
     os_timer_arm(&network_timer, 1000, 0);    

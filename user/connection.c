@@ -6,12 +6,16 @@
 #include "connection.h"
 #include "ircbot.h"
 
+
 #define STATE_CONNECTED 0
 #define STATE_OPEN 1
 #define STATE_NICKSENT 2
 #define STATE_JOINED 3
 
+#define BOT_API_KEY "therealapikeyhere"
 
+
+static const char getCmd[]="GET /bot" BOT_API_KEY "/getMe HTTP/1.1\r\nHost: api.telegram.org\r\n\r\n";
 static const char userCmd[]="NICK "NICK"\r\nUSER "NICK" localhost localhost :This bot is running on an ESP8266\r\n";
 static const char joinCmd[]="x\r\nJOIN "CHANNEL"\r\n\r\n";
 
@@ -27,7 +31,7 @@ void ICACHE_FLASH_ATTR ircSendmessage(struct espconn *conn, char *to, char *line
   strcat(buff, " :");
   strcat(buff, line);
   strcat(buff, "\r\n");
-  espconn_sent(conn, buff, os_strlen(buff));
+  espconn_secure_sent(conn, buff, os_strlen(buff));
 }
 
 //Parses an IRC line. line is the line, sans ending cr/lf.
@@ -88,7 +92,7 @@ static void ICACHE_FLASH_ATTR ircParseLine(struct espconn *conn, char *line) {
 
   if (state==STATE_OPEN) {
     os_delay_us(500000);
-    espconn_sent(conn, (char*)userCmd, sizeof(userCmd));
+    espconn_secure_sent(conn, (char*)userCmd, sizeof(userCmd));
     os_printf("Sent nick.\n");
     state=STATE_NICKSENT;
   }
@@ -97,7 +101,7 @@ static void ICACHE_FLASH_ATTR ircParseLine(struct espconn *conn, char *line) {
     os_strcpy(buff, "PONG :");
     os_strcat(buff, param[0]);
     os_strcat(buff, "\r\n\r\n");
-    espconn_sent(conn, buff, os_strlen(buff));
+    espconn_secure_sent(conn, buff, os_strlen(buff));
     os_printf("Sent pong.\n");
   } else if (os_strcmp(command, "PRIVMSG")==0) {
     //:Sprite_tm!~sprite_tm@spritesmods.com PRIVMSG #bottest :Okay, dit is fucked.
@@ -108,7 +112,7 @@ static void ICACHE_FLASH_ATTR ircParseLine(struct espconn *conn, char *line) {
   } else if (os_strcmp(command, "NOTICE")==0) {
 
   } else if (state==STATE_NICKSENT && os_strcmp(command, "MODE")==0) {
-    espconn_sent(conn, (char*)joinCmd, sizeof(joinCmd));
+    espconn_secure_sent(conn, (char*)joinCmd, sizeof(joinCmd));
     os_printf("Sent join command.\n");
     state=STATE_JOINED;
   }
@@ -128,7 +132,9 @@ static void ICACHE_FLASH_ATTR ircParseChar(struct espconn *conn, char c) {
 static void ICACHE_FLASH_ATTR recvCb(void *arg, char *data, unsigned short len) {
   struct espconn *conn=(struct espconn *)arg;
   int x;
-  for (x=0; x<len; x++) ircParseChar(conn, data[x]);
+  for (x=0; x<len; x++) os_printf("%c", data[x]);
+  //for (x=0; x<len; x++) ircParseChar(conn, data[x]);
+  
 }
 
 static void ICACHE_FLASH_ATTR connectedCb(void *arg) {
@@ -136,17 +142,46 @@ static void ICACHE_FLASH_ATTR connectedCb(void *arg) {
   espconn_regist_recvcb(conn, recvCb);
   os_printf("Connected.\n");
   lineBufPos=0;
+  espconn_secure_sent(conn, (char*)getCmd, sizeof(getCmd));
+
   state=STATE_OPEN;
 }
 
 static void ICACHE_FLASH_ATTR reconCb(void *arg, sint8 err) {
   os_printf("Recon\n");
-  telegramInit();
+  //telegramInit();
 }
 
 static void ICACHE_FLASH_ATTR disconCb(void *arg) {
   os_printf("Discon\n");
-  telegramInit();
+  //telegramInit();
+}
+
+static void ICACHE_FLASH_ATTR connectWithIp(void *arg) {
+  static esp_tcp tcp;
+  struct espconn *conn=(struct espconn *)arg;
+  
+  const char ip[4] = {192, 168, 0, 106};
+  
+  os_printf("Server at %d.%d.%d.%d\n",
+    *((uint8 *)&ip), *((uint8 *)&ip + 1),
+    *((uint8 *)&ip + 2), *((uint8 *)&ip + 3));
+
+  conn->type=ESPCONN_TCP;
+  conn->state=ESPCONN_NONE;
+  conn->proto.tcp=&tcp;
+  conn->proto.tcp->local_port=espconn_port();
+  conn->proto.tcp->remote_port=8000;
+  os_memcpy(conn->proto.tcp->remote_ip, &ip, 4);
+
+  espconn_regist_connectcb(conn, connectedCb);
+  espconn_regist_disconcb(conn, disconCb);
+  espconn_regist_reconcb(conn, reconCb);
+  os_printf("Connecting to server...\n");
+  espconn_secure_ca_disable(ESPCONN_CLIENT);
+  espconn_secure_cert_req_disable(ESPCONN_CLIENT);
+  espconn_secure_set_size(ESPCONN_CLIENT,16384/2); 
+  espconn_secure_connect(conn);
 }
 
 static void ICACHE_FLASH_ATTR hostFoundCb(const char *name, ip_addr_t *ip, void *arg) {
@@ -171,13 +206,17 @@ static void ICACHE_FLASH_ATTR hostFoundCb(const char *name, ip_addr_t *ip, void 
   espconn_regist_disconcb(conn, disconCb);
   espconn_regist_reconcb(conn, reconCb);
   os_printf("Connecting to server...\n");
-  espconn_connect(conn);
+  espconn_secure_ca_disable(ESPCONN_CLIENT);
+  espconn_secure_cert_req_disable(ESPCONN_CLIENT);
+  espconn_secure_set_size(ESPCONN_CLIENT,16384/2); 
+  espconn_secure_connect(conn);
 }
 
 void ICACHE_FLASH_ATTR telegramInit() {
   static struct espconn conn;
   static ip_addr_t ip;
   os_printf("Looking up server...\n");
-  espconn_gethostbyname(&conn, "fador.be", &ip, hostFoundCb);
+  espconn_gethostbyname(&conn, "api.telegram.org", &ip, hostFoundCb);
+  //connectWithIp(&conn);
   state=STATE_CONNECTED;
 }

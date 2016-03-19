@@ -4,7 +4,6 @@
 #include "mem.h"
 #include "osapi.h"
 #include "connection.h"
-#include "ircbot.h"
 
 
 #define STATE_CONNECTED 0

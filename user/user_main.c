@@ -6,7 +6,6 @@
 #include "osapi.h"
 #include "espconn.h"
 #include "connection.h"
-#include "ircbot.h"
 #include "io.h"
 #include "user_network.h"
 

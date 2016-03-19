@@ -8,20 +8,20 @@
 #include "connection.h"
 #include "io.h"
 #include "user_network.h"
+#include "configure.h"
 
 void user_init(void)
 {
-  char *ssid = ""; // Wifi SSID
-  char *password = ""; // Wifi Password
+  char *ssid = WLAN_SSID;
+  char *password = WLAN_PASSWD;
   struct station_config stationConf;
 
-  os_printf("SDK version:%s\n", system_get_sdk_version());
- 
   system_timer_reinit();
   
   os_memcpy(&stationConf.ssid, ssid, 32);
   os_memcpy(&stationConf.password, password, 32);
   uart_init(BIT_RATE_9600, BIT_RATE_9600);
+  os_printf("SDK version:%s\n", system_get_sdk_version());
   wifi_set_opmode( STATION_MODE );
   wifi_set_phy_mode(PHY_MODE_11N);
   wifi_station_set_config(&stationConf);
@@ -29,6 +29,5 @@ void user_init(void)
   
   network_init();
   
-
   os_printf("\nReady\n");
 }

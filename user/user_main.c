@@ -2,6 +2,7 @@
 #include "ets_sys.h"
 #include "c_types.h"
 #include "user_interface.h"
+#include "driver/uart.h"
 #include "osapi.h"
 #include "espconn.h"
 #include "irc.h"
@@ -16,7 +17,7 @@ void user_init(void)
   struct station_config stationConf;
   
   system_timer_reinit();
-  
+  uart_init(BIT_RATE_9600, BIT_RATE_9600);
   os_memcpy(&stationConf.ssid, ssid, 32);
   os_memcpy(&stationConf.password, password, 32);
   wifi_set_opmode( STATION_MODE );
@@ -24,8 +25,8 @@ void user_init(void)
   wifi_station_set_config(&stationConf);
   wifi_station_connect();
   
-	network_init();
-	
+  network_init();
+  
 
-	os_printf("\nReady\n");
+  os_printf("\nReady\n");
 }

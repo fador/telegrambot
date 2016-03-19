@@ -16,7 +16,7 @@ static int lineBufPos;
 LOCAL os_timer_t network_timer;
 
 static void ICACHE_FLASH_ATTR networkParseLine(struct espconn *conn, char *line) {
-	char buff[1024];
+  char buff[1024];
     uint8 page, y;
     page = line[0];
     y = line[1];
@@ -26,44 +26,44 @@ static void ICACHE_FLASH_ATTR networkParseLine(struct espconn *conn, char *line)
 }
 
 static void ICACHE_FLASH_ATTR networkParseChar(struct espconn *conn, char c) {
-	lineBuf[lineBufPos++]=c;
-	if (lineBufPos>=sizeof(lineBuf)) lineBufPos--;
+  lineBuf[lineBufPos++]=c;
+  if (lineBufPos>=sizeof(lineBuf)) lineBufPos--;
 
-	if (lineBufPos>2 && lineBuf[lineBufPos-1]=='\n') {
-		lineBuf[lineBufPos-1]=0;
-		networkParseLine(conn, lineBuf);
-		lineBufPos=0;
-	}
+  if (lineBufPos>2 && lineBuf[lineBufPos-1]=='\n') {
+    lineBuf[lineBufPos-1]=0;
+    networkParseLine(conn, lineBuf);
+    lineBufPos=0;
+  }
 }
 
 static void ICACHE_FLASH_ATTR networkRecvCb(void *arg, char *data, unsigned short len) {
-	struct espconn *conn=(struct espconn *)arg;
-	int x;
-	for (x=0; x<len; x++) networkParseChar(conn, data[x]);
+  struct espconn *conn=(struct espconn *)arg;
+  int x;
+  for (x=0; x<len; x++) networkParseChar(conn, data[x]);
 }
 
 static void ICACHE_FLASH_ATTR networkConnectedCb(void *arg) {
-	struct espconn *conn=(struct espconn *)arg;
-	espconn_regist_recvcb(conn, networkRecvCb);
-	lineBufPos=0;
-    os_printf("connected\n\r");
+  struct espconn *conn=(struct espconn *)arg;
+  espconn_regist_recvcb(conn, networkRecvCb);
+  lineBufPos=0;
+  os_printf("connected\n\r");
 }
 
 static void ICACHE_FLASH_ATTR networkReconCb(void *arg, sint8 err) {
-    os_printf("Reconnect\n\r");
-	network_init();
+  os_printf("Reconnect\n\r");
+  network_init();
 }
 
 static void ICACHE_FLASH_ATTR networkDisconCb(void *arg) {
-    os_printf("Disconnect\n\r");
-	network_init();
+  os_printf("Disconnect\n\r");
+  network_init();
 }
 
 
 void ICACHE_FLASH_ATTR
 network_start() {
-  ircInit();
-	ircbotInit();
+  telegramInit();
+  ircbotInit();
 }
 
 void ICACHE_FLASH_ATTR

@@ -119,12 +119,7 @@ int ICACHE_FLASH_ATTR parseReply(char *data, int len)
   }
   if(id) {
     sendStatus = false;
-    ets_wdt_disable();
     replyMessage(id, username, textbuf);
-    while(!sendStatus) {
-      os_delay_us(1024*16);      
-    }
-    ets_wdt_enable();
   }
   return update_id;
 }

@@ -9,14 +9,18 @@
 
 #define BUFFERLEN 1024
 
-#define GETUPDATE "GET /bot" BOT_API_KEY "/getUpdates?limit=1&timeout=100&offset=%d HTTP/1.1\r\nHost: api.telegram.org\r\nConnection: close\r\n\r\n\0"
-static char sendBuf[128];
+#define GETUPDATE "GET /bot" BOT_API_KEY "/getUpdates?limit=1&timeout=100&offset=%d HTTP/1.1\r\nHost: api.telegram.org\r\nConnection: close\r\n\r\n"
 
-static char buffer[BUFFERLEN];
-static int bufferpos = 0;
-ip_addr_t ip;
-static struct espconn conn;
-static int update_id = 0;
+LOCAL char sendBuf[128];
+LOCAL char buffer[BUFFERLEN];
+LOCAL int bufferpos = 0;
+LOCAL ip_addr_t ip;
+LOCAL struct espconn conn;
+LOCAL int update_id = 0;
+
+LOCAL os_timer_t check_updates_timer;
+
+void ICACHE_FLASH_ATTR hostFoundCb(const char *name, ip_addr_t *ip, void *arg);
 
 static void ICACHE_FLASH_ATTR recvCb(void *arg, char *data, unsigned short len) {
   struct espconn *conn=(struct espconn *)arg;
@@ -37,20 +41,30 @@ static void ICACHE_FLASH_ATTR connectedCb(void *arg) {
 }
 
 static void ICACHE_FLASH_ATTR reconCb(void *arg, sint8 err) {
+  struct espconn *conn=(struct espconn *)arg;
   os_printf("Recon\n");
+  espconn_delete(conn);
+}
+
+void ICACHE_FLASH_ATTR check_updates(void)
+{
+  hostFoundCb(NULL, &ip, (void*)&conn);
 }
 
 static void ICACHE_FLASH_ATTR disconCb(void *arg) {
+  struct espconn *conn=(struct espconn *)arg;
   os_printf("Discon\n");
+  espconn_delete(conn);
   if(bufferpos) {
     int uid = parseReply(buffer, bufferpos);
     if(uid > 0) {
       update_id = uid + 1;
     }
   }
-  os_delay_us(500000);
-  bufferpos = 0;
-  espconn_gethostbyname(&conn, "api.telegram.org", &ip, hostFoundCb);
+  os_timer_disarm(&check_updates_timer);
+  os_timer_setfn(&check_updates_timer, (os_timer_func_t *)check_updates, NULL);
+  os_timer_arm(&check_updates_timer, 500, 0);
+  bufferpos = 0;  
 }
 
 static void ICACHE_FLASH_ATTR connectWithIp(void *arg) {

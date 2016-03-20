@@ -1,8 +1,25 @@
-#include "c_types.h"
-#include "user_interface.h"
-#include "espconn.h"
-#include "mem.h"
-#include "osapi.h"
+/*
+  Copyright (c) 2016, Marko Viitanen (Fador)
+
+  Permission to use, copy, modify, and/or distribute this software for any purpose 
+  with or without fee is hereby granted, provided that the above copyright notice 
+  and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH 
+  REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY 
+  AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, 
+  INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM 
+  LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE 
+  OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR 
+  PERFORMANCE OF THIS SOFTWARE.
+
+*/
+
+#include <c_types.h>
+#include <user_interface.h>
+#include <espconn.h>
+#include <mem.h>
+#include <osapi.h>
 #include "connection.h"
 #include "message.h"
 #include "configure.h"
@@ -19,8 +36,6 @@ LOCAL struct espconn conn;
 LOCAL int update_id = 0;
 
 LOCAL os_timer_t check_updates_timer;
-
-void ICACHE_FLASH_ATTR hostFoundCb(const char *name, ip_addr_t *ip, void *arg);
 
 static void ICACHE_FLASH_ATTR recvCb(void *arg, char *data, unsigned short len) {
   struct espconn *conn=(struct espconn *)arg;

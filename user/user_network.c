@@ -2,11 +2,11 @@
 Tnx to Sprite_TM (source came from his esp8266ircbot)
 */
 
-#include "c_types.h"
-#include "user_interface.h"
-#include "espconn.h"
-#include "mem.h"
-#include "osapi.h"
+#include <c_types.h>
+#include <user_interface.h>
+#include <espconn.h>
+#include <mem.h>
+#include <osapi.h>
 #include "user_network.h"
 #include "user_config.h"
 #include "connection.h"
@@ -62,7 +62,6 @@ static void ICACHE_FLASH_ATTR networkDisconCb(void *arg) {
 
 void ICACHE_FLASH_ATTR network_start() {
   telegramInit();
-  //ircbotInit();
 }
 
 void ICACHE_FLASH_ATTR network_check_ip(void)
